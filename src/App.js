@@ -34,31 +34,23 @@ const App = () => {
         borderRadius: '1rem'
       }}>
         <h3 className="heading">Basemap</h3>
-        <input id='streets-v11' type='radio' name='rtoggle' value='streets-v11' checked={basemap == 'streets-v11'} onChange={handleOptionChange} />
-        <label htmlFor='streets'>Streets</label>
-        <br />
-        <input id='light-v10' type='radio' name='rtoggle' value='light-v10' checked={basemap == 'light-v10'} onChange={handleOptionChange} />
-        <label htmlFor='light'>Light</label>
-        <br />
-        <input id='dark-v10' type='radio' name='rtoggle' value='dark-v10' checked={basemap == 'dark-v10'} onChange={handleOptionChange} />
-        <label htmlFor='dark'>Dark</label>
-        <br />
-        <input id='outdoors-v11' type='radio' name='rtoggle' value='outdoors-v11' checked={basemap == 'outdoors-v11'} onChange={handleOptionChange} />
-        <label htmlFor='outdoors'>Outdoors</label>
-        <br />
-        <input id='satellite-v9' type='radio' name='rtoggle' value='satellite-v9' checked={basemap == 'satellite-v9'} onChange={handleOptionChange} />
-        <label htmlFor='satellite'>Satellite</label>
+        <select onChange={handleOptionChange} value={basemap}>
+          <option value='streets-v11' >Streets</option>
+          <option value='light-v10' >Light</option>
+          <option value='dark-v10' >Dark</option>
+          <option value='outdoors-v11' >Outdoors</option>
+          <option value='satellite-v9' >Satellite</option>
+        </select>
         <hr />
-        <input type='checkbox' checked={tiltWithDevice} onChange={() => setTiltWithDevice(!tiltWithDevice)} />
-        <label>Tilt With Device</label>
-        <br />
-        <button onClick={() => setPanelVisible(!panelVisible)}>Toggle Panel</button>
-        <hr />
+        <h3 className="heading">Layers</h3>
         <input type='checkbox' checked={layersVisible.scatter} onChange={() => setLayersVisible({ ...layersVisible, scatter: !layersVisible.scatter })} />
         <label>Scatterplot</label>
         <br />
         <input type='checkbox' checked={layersVisible.heat} onChange={() => setLayersVisible({ ...layersVisible, heat: !layersVisible.heat })} />
         <label>3D Heatmap</label>
+        <hr />
+        <input type='checkbox' checked={tiltWithDevice} onChange={() => setTiltWithDevice(!tiltWithDevice)} />
+        <label>Tilt With Device</label>
       </div>
       <div>
         <Map basemap={basemap}
@@ -84,6 +76,14 @@ const App = () => {
             display: 'flex',
             flexDirection: 'row'
           }}>
+            <span style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              margin: '1rem',
+              cursor: 'pointer',
+            }}
+              onClick={() => setPanelVisible(!panelVisible)}>﹀</span>
 
             {
               box.properties.image && <img style={{
