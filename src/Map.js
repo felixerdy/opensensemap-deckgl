@@ -126,28 +126,31 @@ const Map = (props) => {
     useEffect(() => {
         if (props.tiltWithDevice) {
             window.addEventListener("deviceorientation", _handleOrientation, true);
-        } else {
-            setViewport({
-                ...viewport,
-                pitch: 0,
-                bearing: 0
-            })
         }
 
         return () => {
             window.removeEventListener("deviceorientation", _handleOrientation, true)
+            setTimeout(() => {
+                setViewport(prevState => ({
+                    ...prevState,
+                    pitch: 0,
+                    bearing: 0,
+                    transitionDuration: 200,
+                    transitionInterpolator: new FlyToInterpolator()
+                }))
+            }, 200)
         };
     }, [props.tiltWithDevice])
 
     const _handleOrientation = (e) => {
         if (e.beta <= 60 && e.beta >= 0) {
-            setViewport({
-                ...viewport,
+            setViewport(prevState => ({
+                ...prevState,
                 pitch: e.beta,
-                bearing: -e.alpha,
+                bearing: -e.alpha + 90,
                 transitionDuration: 200,
                 transitionInterpolator: new FlyToInterpolator()
-            })
+            }))
         }
     }
 
@@ -175,7 +178,7 @@ const Map = (props) => {
         <DeckGL
             viewState={viewport}
             controller
-            onViewStateChange={({ viewState }) => setViewport(viewState)}
+            onViewStateChange={({ viewState }) => setViewport(prevState => ({ ...prevState, ...viewState }))}
             layers={[heatLayer, scatterLayer]}>
             {_renderTooltip.bind(this)}
             <StaticMap mapStyle={'mapbox://styles/mapbox/' + props.basemap} />
