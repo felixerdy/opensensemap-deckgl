@@ -8,6 +8,7 @@ const App = () => {
   const [basemap, setBasemap] = useState('light-v10')
 
   const [panelVisible, setPanelVisible] = useState(true)
+  const [tiltWithDevice, setTiltWithDevice] = useState(false)
 
   const [box, setBox] = useState()
 
@@ -48,6 +49,9 @@ const App = () => {
         <input id='satellite-v9' type='radio' name='rtoggle' value='satellite-v9' checked={basemap == 'satellite-v9'} onChange={handleOptionChange} />
         <label htmlFor='satellite'>Satellite</label>
         <hr />
+        <input type='checkbox' checked={tiltWithDevice} onChange={() => setTiltWithDevice(!tiltWithDevice)} />
+        <label>Tilt With Device</label>
+        <br />
         <button onClick={() => setPanelVisible(!panelVisible)}>Toggle Panel</button>
         <hr />
         <input type='checkbox' checked={layersVisible.scatter} onChange={() => setLayersVisible({ ...layersVisible, scatter: !layersVisible.scatter })} />
@@ -59,6 +63,7 @@ const App = () => {
       <div>
         <Map basemap={basemap}
           layersVisible={layersVisible}
+          tiltWithDevice={tiltWithDevice}
           onBoxSelect={(object) => {
             setPanelVisible(true)
             setBox(object)

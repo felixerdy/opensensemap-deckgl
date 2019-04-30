@@ -3,10 +3,9 @@ import DeckGL from '@deck.gl/react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { StaticMap } from 'react-map-gl';
 import { HexagonLayer } from '@deck.gl/aggregation-layers';
-
+import { FlyToInterpolator } from 'deck.gl'
 
 const Map = (props) => {
-
     const scale = (num, in_min, in_max, out_min, out_max) => {
         return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
@@ -19,6 +18,10 @@ const Map = (props) => {
         latitude: 45,
         longitude: 9,
         zoom: 4,
+        pitch: 0,
+        bearing: 0,
+        transitionDuration: 200,
+        transitionInterpolator: new FlyToInterpolator()
     })
 
     const scatter = new GeoJsonLayer({
@@ -28,7 +31,7 @@ const Map = (props) => {
         stroked: false,
         pointRadiusMinPixels: 6,
         getRadius: 10,
-        visible: props.layersVisible.scatter,
+        visible: props.layersVisible.scatter && (viewport.zoom < 5 ? false : true),
         opacity: () => {
             if (viewport.zoom < 5) {
                 return 0
@@ -75,7 +78,7 @@ const Map = (props) => {
         extruded: true,
         radius: 20000,
         coverage: 0.8,
-        visible: props.layersVisible.heat,
+        visible: props.layersVisible.heat && (viewport.zoom > 6 ? false : true),
         pickable: true,
         onHover: ({ object, x, y }) => {
             if (viewport.zoom < 6) {
@@ -118,6 +121,35 @@ const Map = (props) => {
         setScatterLayer(scatter)
         setHeatLayer(heat)
     }, [props.layersVisible, viewport.zoom, data])
+
+    //  device orientation
+    useEffect(() => {
+        if (props.tiltWithDevice) {
+            window.addEventListener("deviceorientation", _handleOrientation, true);
+        } else {
+            setViewport({
+                ...viewport,
+                pitch: 0,
+                bearing: 0
+            })
+        }
+
+        return () => {
+            window.removeEventListener("deviceorientation", _handleOrientation, true)
+        };
+    }, [props.tiltWithDevice])
+
+    const _handleOrientation = (e) => {
+        if (e.beta <= 60 && e.beta >= 0) {
+            setViewport({
+                ...viewport,
+                pitch: e.beta,
+                bearing: -e.alpha,
+                transitionDuration: 200,
+                transitionInterpolator: new FlyToInterpolator()
+            })
+        }
+    }
 
     const _renderTooltip = () => {
         const { object, pointerX, pointerY } = tooltip || {}
