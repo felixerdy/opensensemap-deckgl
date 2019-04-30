@@ -3,7 +3,7 @@
   "version": "0.1",
   "description": "",
   "scripts": {
-    "dev": "webpack-dev-server --host 0.0.0.0 --port 1234 --mode development",
+    "dev": "webpack-dev-server --host 0.0.0.0 --port 1234 --mode development --https ",
     "build": "webpack --mode production"
   },
   "license": "MIT",
