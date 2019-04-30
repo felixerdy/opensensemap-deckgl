@@ -176,7 +176,7 @@ const Map = (props) => {
             viewState={viewport}
             controller
             onViewStateChange={({ viewState }) => setViewport(viewState)}
-            layers={[scatterLayer, heatLayer]}>
+            layers={[heatLayer, scatterLayer]}>
             {_renderTooltip.bind(this)}
             <StaticMap mapStyle={'mapbox://styles/mapbox/' + props.basemap} />
         </DeckGL>
