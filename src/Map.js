@@ -1,89 +1,123 @@
 import React, { useState, useEffect } from "react";
 import DeckGL from '@deck.gl/react';
-import { GeoJsonLayer, IconLayer } from '@deck.gl/layers';
+import { GeoJsonLayer } from '@deck.gl/layers';
 import { StaticMap } from 'react-map-gl';
-import { FlyToInterpolator } from "@deck.gl/core";
+import { HexagonLayer } from '@deck.gl/aggregation-layers';
+
 
 const Map = (props) => {
 
     const scale = (num, in_min, in_max, out_min, out_max) => {
         return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
+    const [data, setData] = useState()
 
     // Viewport settings
     const [viewport, setViewport] = useState({
         width: "100%",
         height: "100%",
-        altitude: 1.5,
         latitude: 45,
         longitude: 9,
         zoom: 4,
-        maxPitch: 60,
-        maxZoom: 20,
-        minPitch: 0,
-        minZoom: 0,
-        pitch: 0,
-        transitionDuration: 500,
-        transitionInterpolator: new FlyToInterpolator()
     })
-    const [layer, setLayer] = useState()
+
+    const scatter = new GeoJsonLayer({
+        id: 'geojson',
+        data,
+        pickable: true,
+        stroked: false,
+        pointRadiusMinPixels: 6,
+        getRadius: 10,
+        visible: props.layersVisible.scatter,
+        opacity: () => {
+            if (viewport.zoom < 5) {
+                return 0
+            }
+            if (viewport.zoom > 8) {
+                return 1
+            }
+            return scale(viewport.zoom, 5, 8, 0, 1)
+        },
+        getFillColor: d => {
+            const diff = new Date() - new Date(d.properties.updatedAt)
+            const scaled = scale(diff, 0, 604800000, 255, 50)
+            return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
+        },
+        onHover: ({ object, x, y }) => {
+            if (viewport.zoom > 6) {
+                setTooltip({
+                    object: object,
+                    pointerX: x,
+                    pointerY: y
+                })
+            }
+        },
+        onClick: ({ object }) => {
+            if (viewport.zoom > 6) {
+                props.onBoxSelect(object)
+                console.log(object)
+            }
+        }
+    })
+
+    const heat = new HexagonLayer({
+        id: 'heatmap',
+        colorRange: [
+            [1, 152, 189],
+            [73, 227, 206],
+            [216, 254, 181],
+            [254, 237, 177],
+            [254, 173, 84],
+            [209, 55, 78]
+        ],
+        data: data ? data.features : [],
+        elevationScale: 200,
+        extruded: true,
+        radius: 20000,
+        coverage: 0.8,
+        visible: props.layersVisible.heat,
+        pickable: true,
+        onHover: ({ object, x, y }) => {
+            if (viewport.zoom < 6) {
+                setTooltip({
+                    object: object,
+                    pointerX: x,
+                    pointerY: y
+                })
+            }
+        },
+        getPosition: d => d.geometry.coordinates,
+        opacity: () => {
+            if (viewport.zoom < 4) {
+                return 1
+            }
+            if (viewport.zoom > 6) {
+                return 0
+            }
+            return scale(viewport.zoom, 4, 6, 1, 0)
+        },
+
+
+    })
+
+    const [scatterLayer, setScatterLayer] = useState(scatter)
+    const [heatLayer, setHeatLayer] = useState(heat)
+
     const [tooltip, setTooltip] = useState()
 
+    // fetching API data
     useEffect(() => {
-        _fetchAndSetBoxes()
-        setInterval(() => {
-            _fetchAndSetBoxes()
-        }, 30000)
-    }, [])
-
-    const ICON_MAPPING = {
-        marker: { x: 0, y: 0, width: 32, height: 32, mask: true }
-    };
-
-    const _fetchAndSetBoxes = () => {
-        console.log("fetching data 📡")
         fetch('https://api.opensensemap.org/boxes?format=geojson')
             .then(res => res.json())
             .then(data => {
-                console.log("creating layer 🤓")
-                const boxLayer = new GeoJsonLayer({
-                    id: 'geojson',
-                    data,
-                    pickable: true,
-                    stroked: false,
-                    pointRadiusMinPixels: 4,
-                    getRadius: 10,
-                    fp64: true,
-                    // _subLayerProps: {
-                    //     points: {
-                    //         type: IconLayer,
-                    //         iconAtlas: 'images/icon.png',
-                    //         iconMapping: ICON_MAPPING,
-                    //         getIcon: d => 'marker',
-                    //         getColor: [255, 200, 0],
-                    //         getSize: 32
-                    //     }
-                    // },
-                    getFillColor: d => {
-                        const diff = new Date() - new Date(d.properties.updatedAt)
-                        const scaled = scale(diff, 0, 604800000, 255, 50)
-                        return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
-                    },
-                    onHover: ({ object, x, y }) => {
-                        setTooltip({
-                            object: object,
-                            pointerX: x,
-                            pointerY: y
-                        })
-                    },
-                    onClick: ({ object }) => {
-                        props.onBoxSelect(object)
-                        console.log(object)
-                    }
-                })
-                setLayer(boxLayer)
+                setData(data)
             })
-    }
+    }, [])
+
+    useEffect(() => {
+        setScatterLayer(scatter)
+        setHeatLayer(heat)
+    }, [props.layersVisible, viewport.zoom, data])
 
     const _renderTooltip = () => {
         const { object, pointerX, pointerY } = tooltip || {}
@@ -100,7 +134,8 @@ const Map = (props) => {
             borderRadius: '1rem',
             color: 'white'
         }}>
-            {object.properties.name}
+            {object.properties && object.properties.name}
+            {object.elevationValue && `${object.elevationValue} Boxes`}
         </div>
     }
 
@@ -109,10 +144,9 @@ const Map = (props) => {
             viewState={viewport}
             controller
             onViewStateChange={({ viewState }) => setViewport(viewState)}
-            layers={[layer]}>
+            layers={[scatterLayer, heatLayer]}>
             {_renderTooltip.bind(this)}
-            <StaticMap
-                mapStyle={'mapbox://styles/mapbox/' + props.basemap} />
+            <StaticMap mapStyle={'mapbox://styles/mapbox/' + props.basemap} />
         </DeckGL>
     )
 }

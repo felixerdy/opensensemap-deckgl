@@ -11,6 +11,11 @@ const App = () => {
 
   const [box, setBox] = useState()
 
+  const [layersVisible, setLayersVisible] = useState({
+    scatter: true,
+    heat: true
+  })
+
   const handleOptionChange = (changeEvent) => {
     setBasemap(changeEvent.target.value)
   }
@@ -42,13 +47,22 @@ const App = () => {
         <br />
         <input id='satellite-v9' type='radio' name='rtoggle' value='satellite-v9' checked={basemap == 'satellite-v9'} onChange={handleOptionChange} />
         <label htmlFor='satellite'>Satellite</label>
-        <button onClick={() => setPanelVisible(!panelVisible)}>Panel</button>
+        <hr />
+        <button onClick={() => setPanelVisible(!panelVisible)}>Toggle Panel</button>
+        <hr />
+        <input type='checkbox' checked={layersVisible.scatter} onChange={() => setLayersVisible({ ...layersVisible, scatter: !layersVisible.scatter })} />
+        <label>Scatterplot</label>
+        <br />
+        <input type='checkbox' checked={layersVisible.heat} onChange={() => setLayersVisible({ ...layersVisible, heat: !layersVisible.heat })} />
+        <label>3D Heatmap</label>
       </div>
       <div>
-        <Map basemap={basemap} onBoxSelect={(object) => {
-          setPanelVisible(true)
-          setBox(object)
-        }} />
+        <Map basemap={basemap}
+          layersVisible={layersVisible}
+          onBoxSelect={(object) => {
+            setPanelVisible(true)
+            setBox(object)
+          }} />
         {
           box && <div style={{
             position: 'absolute',
