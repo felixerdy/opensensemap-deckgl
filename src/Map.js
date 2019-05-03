@@ -42,6 +42,9 @@ const Map = (props) => {
             return scale(viewport.zoom, 5, 8, 0, 1)
         },
         getFillColor: d => {
+            if (d.properties.exposure == "mobile") {
+                return [0, 0, 255, 255]
+            }
             const diff = new Date() - new Date(d.properties.updatedAt)
             const scaled = scale(diff, 0, 604800000, 255, 50)
             return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
@@ -175,14 +178,16 @@ const Map = (props) => {
     }
 
     return (
-        <DeckGL
-            viewState={viewport}
-            controller
-            onViewStateChange={({ viewState }) => setViewport(prevState => ({ ...prevState, ...viewState }))}
-            layers={[heatLayer, scatterLayer]}>
-            {_renderTooltip.bind(this)}
-            <StaticMap mapStyle={'mapbox://styles/mapbox/' + props.basemap} />
-        </DeckGL>
+        <React.Fragment>
+            <DeckGL
+                viewState={viewport}
+                controller
+                onViewStateChange={({ viewState }) => setViewport(prevState => ({ ...prevState, ...viewState }))}
+                layers={[heatLayer, scatterLayer]}>
+                {_renderTooltip.bind(this)}
+                <StaticMap mapStyle={'mapbox://styles/mapbox/' + props.basemap} />
+            </DeckGL>
+        </React.Fragment>
     )
 }
 
