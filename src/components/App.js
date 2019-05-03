@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import './App.css'
 import Map from "./Map"
-
-import Sensor from './Sensor'
+import BoxPanel from './BoxPanel'
 
 import 'bulma/css/bulma.css'
 
@@ -10,7 +8,6 @@ import 'bulma/css/bulma.css'
 const App = () => {
   const [basemap, setBasemap] = useState('dark-v10')
 
-  const [panelVisible, setPanelVisible] = useState(true)
   const [tiltWithDevice, setTiltWithDevice] = useState(false)
 
   const [box, setBox] = useState()
@@ -50,7 +47,9 @@ const App = () => {
 
   return (
     <React.Fragment>
-      <nav className="navbar is-dark" role="navigation" aria-label="main navigation">
+      <nav className="navbar" role="navigation" aria-label="main navigation" style={{
+        backgroundColor: 'rgba(29, 29, 29, 0.9)',
+      }}>
         <div className="navbar-brand">
           <a className="navbar-item" href="">
             <img src="https://sensebox.de/images/sensebox_logo.svg" />
@@ -67,11 +66,14 @@ const App = () => {
           <div className="navbar-start">
             <div className="navbar-item">
               <h3 className="heading">Layers</h3>
-              <input type='checkbox' checked={layersVisible.scatter} onChange={() => setLayersVisible({ ...layersVisible, scatter: !layersVisible.scatter })} />
-              <label>Scatterplot</label>
-              <br />
-              <input type='checkbox' checked={layersVisible.heat} onChange={() => setLayersVisible({ ...layersVisible, heat: !layersVisible.heat })} />
-              <label>3D Heatmap</label>
+              <p>
+                <input type='checkbox' checked={layersVisible.scatter} onChange={() => setLayersVisible({ ...layersVisible, scatter: !layersVisible.scatter })} />
+                <label>Scatterplot</label>
+                <br />
+                <input type='checkbox' checked={layersVisible.heat} onChange={() => setLayersVisible({ ...layersVisible, heat: !layersVisible.heat })} />
+                <label>3D Heatmap</label>
+
+              </p>
             </div>
 
             <div className="navbar-item">
@@ -98,51 +100,11 @@ const App = () => {
           layersVisible={layersVisible}
           tiltWithDevice={tiltWithDevice}
           onBoxSelect={(object) => {
-            setPanelVisible(true)
             setBox(object)
           }} />
-        {/* {
-          box && <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            margin: '1rem',
-            marginBottom: '2rem',
-            backgroundColor: 'white',
-            borderRadius: '1rem',
-            fontWeight: 500,
-            transform: panelVisible ? 'translateY(0)' : 'translateY(calc(100% + 2rem))',
-            transition: '200ms',
-            display: 'flex',
-            flexDirection: 'row'
-          }}>
-            <span style={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              margin: '1rem',
-              cursor: 'pointer',
-            }}
-              onClick={() => setPanelVisible(!panelVisible)}>﹀</span>
-
-            {
-              box.properties.image && <img style={{
-                height: '6rem',
-                borderRadius: '1rem 0rem 0rem 1rem'
-              }}
-                src={`https://opensensemap.org/userimages/${box.properties.image}`}></img>
-            }
-
-            <div style={{ padding: '1rem', display: 'flex', overflow: 'scroll' }}>
-              <h2>{box.properties.name}</h2>
-              {box.properties.sensors.map((e, i) => (
-                <Sensor boxID={box.properties._id} id={i} sensor={e}></Sensor>
-              ))}
-            </div>
-
-          </div>
-        } */}
+        {
+          box && <BoxPanel box={box} />
+        }
       </div>
     </React.Fragment>
   )

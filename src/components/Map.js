@@ -15,7 +15,7 @@ const Map = (props) => {
     const [viewport, setViewport] = useState({
         width: "100%",
         height: "100%",
-        latitude: 45,
+        latitude: 50,
         longitude: 9,
         zoom: 4,
         pitch: 0,
@@ -45,7 +45,7 @@ const Map = (props) => {
             if (d.properties.exposure == "mobile") {
                 return [0, 0, 255, 255]
             }
-            const diff = new Date() - new Date(d.properties.updatedAt)
+            const diff = new Date() - new Date(d.properties.lastMeasurementAt)
             const scaled = scale(diff, 0, 604800000, 255, 50)
             return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
         },
@@ -113,12 +113,19 @@ const Map = (props) => {
 
     // fetching API data
     useEffect(() => {
-        fetch('https://api.opensensemap.org/boxes?format=geojson')
+        _fetchData()
+        setInterval(_fetchData, 30000)
+
+    }, [])
+
+    const _fetchData = () => {
+        console.log("Fetching new Data... 📡")
+        fetch('https://api.opensensemap.org/boxes?format=geojson&minimal=true')
             .then(res => res.json())
             .then(data => {
                 setData(data)
             })
-    }, [])
+    }
 
     useEffect(() => {
         setScatterLayer(scatter)
