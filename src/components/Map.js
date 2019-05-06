@@ -161,7 +161,15 @@ const Map = (props) => {
                 transitionDuration: 200,
                 transitionInterpolator: new FlyToInterpolator()
             }))
+        } else {
+            setViewport(prevState => ({
+                ...prevState,
+                bearing: -e.alpha + 90,
+                transitionDuration: 200,
+                transitionInterpolator: new FlyToInterpolator()
+            }))
         }
+        
     }
 
     const _renderTooltip = () => {
