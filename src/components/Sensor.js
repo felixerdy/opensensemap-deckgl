@@ -20,8 +20,14 @@ const Sensor = ({ boxID, sensor }) => {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active) {
             return (
-                <div>
+                <div style={{
+                    backgroundColor: 'rgba(29, 29, 29, 0.9)',
+                    color: 'white',
+                    borderRadius: '1rem',
+                    padding: '1rem'
+                }}>
                     {payload[0].value} {sensor.unit}
+                    <br />
                     {payload[0].payload.x.toUTCString()}
                 </div>
             );
