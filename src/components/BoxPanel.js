@@ -23,13 +23,10 @@ const BoxPanel = ({ box }) => {
 
     return (
         <div style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            margin: '1rem',
-            marginBottom: '2rem',
-            transform: panelVisible ? 'translate(0, 0)' : 'translate(0, calc(100% + 2rem))',
+            position: 'fixed',
+            bottom: '2rem',
+            left: '50%',
+            transform: panelVisible ? 'translate(-50%, 0)' : 'translate(-50%, calc(100% + 2rem))',
             transition: '200ms',
             textAlign: 'center'
         }}>
