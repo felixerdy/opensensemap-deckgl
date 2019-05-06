@@ -31,26 +31,31 @@ const Map = (props) => {
         stroked: false,
         pointRadiusMinPixels: 6,
         getRadius: 10,
-        visible: props.layersVisible.scatter && (viewport.zoom < 5 ? false : true),
+        visible: !props.layersVisible.heat ? true : (props.layersVisible.scatter && (viewport.zoom < 5 ? false : true)),
         opacity: () => {
-            if (viewport.zoom < 5) {
-                return 0
-            }
-            if (viewport.zoom > 8) {
+            if (props.layersVisible.heat) {
+                if (viewport.zoom < 5) {
+                    return 0
+                }
+                if (viewport.zoom > 8) {
+                    return 1
+                }
+                return scale(viewport.zoom, 5, 8, 0, 1)
+            } else {
                 return 1
             }
-            return scale(viewport.zoom, 5, 8, 0, 1)
         },
         getFillColor: d => {
-            if (d.properties.exposure == "mobile") {
-                return [0, 0, 255, 255]
-            }
             const diff = new Date() - new Date(d.properties.lastMeasurementAt)
+            // scale alpha value from today (255) to 7 days ago (50)
             const scaled = scale(diff, 0, 604800000, 255, 50)
+            if (d.properties.exposure == "mobile") {
+                return diff < 604800000 ? [0, 0, 255, scaled] : [0, 0, 255, 50]
+            }
             return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
         },
         onHover: ({ object, x, y }) => {
-            if (viewport.zoom > 6) {
+            if (viewport.zoom > 6 || !props.layersVisible.heat) {
                 setTooltip({
                     object: object,
                     pointerX: x,
@@ -59,7 +64,7 @@ const Map = (props) => {
             }
         },
         onClick: ({ object }) => {
-            if (viewport.zoom > 6) {
+            if (viewport.zoom > 6 || !props.layersVisible.heat) {
                 props.onBoxSelect(object)
                 console.log(object)
             }
@@ -161,7 +166,15 @@ const Map = (props) => {
                 transitionDuration: 200,
                 transitionInterpolator: new FlyToInterpolator()
             }))
+        } else {
+            setViewport(prevState => ({
+                ...prevState,
+                bearing: -e.alpha + 90,
+                transitionDuration: 200,
+                transitionInterpolator: new FlyToInterpolator()
+            }))
         }
+        
     }
 
     const _renderTooltip = () => {
