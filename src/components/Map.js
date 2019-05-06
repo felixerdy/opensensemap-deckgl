@@ -42,11 +42,12 @@ const Map = (props) => {
             return scale(viewport.zoom, 5, 8, 0, 1)
         },
         getFillColor: d => {
-            if (d.properties.exposure == "mobile") {
-                return [0, 0, 255, 255]
-            }
             const diff = new Date() - new Date(d.properties.lastMeasurementAt)
+            // scale alpha value from today (255) to 7 days ago (50)
             const scaled = scale(diff, 0, 604800000, 255, 50)
+            if (d.properties.exposure == "mobile") {
+                return diff < 604800000 ? [0, 0, 255, scaled] : [0, 0, 255, 50]
+            }
             return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
         },
         onHover: ({ object, x, y }) => {
