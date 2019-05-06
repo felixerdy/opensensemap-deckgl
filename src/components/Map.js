@@ -31,15 +31,19 @@ const Map = (props) => {
         stroked: false,
         pointRadiusMinPixels: 6,
         getRadius: 10,
-        visible: props.layersVisible.scatter && (viewport.zoom < 5 ? false : true),
+        visible: !props.layersVisible.heat ? true : (props.layersVisible.scatter && (viewport.zoom < 5 ? false : true)),
         opacity: () => {
-            if (viewport.zoom < 5) {
-                return 0
-            }
-            if (viewport.zoom > 8) {
+            if (props.layersVisible.heat) {
+                if (viewport.zoom < 5) {
+                    return 0
+                }
+                if (viewport.zoom > 8) {
+                    return 1
+                }
+                return scale(viewport.zoom, 5, 8, 0, 1)
+            } else {
                 return 1
             }
-            return scale(viewport.zoom, 5, 8, 0, 1)
         },
         getFillColor: d => {
             const diff = new Date() - new Date(d.properties.lastMeasurementAt)
