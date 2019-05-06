@@ -55,7 +55,7 @@ const Map = (props) => {
             return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
         },
         onHover: ({ object, x, y }) => {
-            if (viewport.zoom > 6) {
+            if (viewport.zoom > 6 || !props.layersVisible.heat) {
                 setTooltip({
                     object: object,
                     pointerX: x,
@@ -64,7 +64,7 @@ const Map = (props) => {
             }
         },
         onClick: ({ object }) => {
-            if (viewport.zoom > 6) {
+            if (viewport.zoom > 6 || !props.layersVisible.heat) {
                 props.onBoxSelect(object)
                 console.log(object)
             }

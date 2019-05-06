@@ -28,7 +28,8 @@ const BoxPanel = ({ box }) => {
             left: '50%',
             transform: panelVisible ? 'translate(-50%, 0)' : 'translate(-50%, calc(100% + 2rem))',
             transition: '200ms',
-            textAlign: 'center'
+            textAlign: 'center',
+            maxWidth: 'calc(100% - 2rem)'
         }}>
             <div style={{
                 backgroundColor: 'rgba(29, 29, 29, 0.9)',
