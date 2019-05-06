@@ -55,6 +55,7 @@ const BoxPanel = ({ box }) => {
                     top: 0,
                     margin: '1rem',
                     cursor: 'pointer',
+                    zIndex: 5
                 }}
                     onClick={() => setPanelVisible(!panelVisible)} >﹀</span>
 
