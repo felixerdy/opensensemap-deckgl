@@ -5,9 +5,13 @@ import {
 
 
 
-const Sensor = ({ boxID, sensor }) => {
+const Sensor = ({ boxID, sensor, propHover }) => {
     const [data, setData] = useState()
     const [hoverData, setHoverData] = useState()
+
+    useEffect(() => {
+        propHover(hoverData)
+    }, [hoverData])
 
     useEffect(() => {
         fetch(`https://api.opensensemap.org/boxes/${boxID}/data/${sensor._id}/`)
@@ -61,7 +65,7 @@ const Sensor = ({ boxID, sensor }) => {
                     data && <AreaChart
                         width={198}
                         height={100}
-                        data={data.map((e, i) => ({ y: Number(e.value), x: new Date(e.createdAt) }))}
+                        data={data.map((e, i) => ({ y: Number(e.value), x: new Date(e.createdAt) })).reverse()}
                         onMouseMove={(e) => setHoverData(e)}
                         onMouseLeave={(e) => setHoverData(null)}
                     >

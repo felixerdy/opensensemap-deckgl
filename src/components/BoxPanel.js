@@ -9,6 +9,8 @@ const BoxPanel = ({ box }) => {
     const [panelVisible, setPanelVisible] = useState(true)
     const [data, setData] = useState()
 
+    const [hoverData, setHoverData] = useState()
+
     useEffect(() => {
         setPanelVisible(true)
         fetch(`https://api.opensensemap.org/boxes/${box.properties._id}/`)
@@ -59,15 +61,23 @@ const BoxPanel = ({ box }) => {
 
                 {/* Box title and last seen */}
                 <h1 style={{ fontWeight: 'bold' }}>{box.properties.name}</h1>
-                <h3>Zuletzt online: {
-                    data ? moment(data.updatedAt).locale("de").fromNow() : null
-                }</h3>
+                {
+                    hoverData &&
+                    <h3>{hoverData.activePayload[0].payload.x.toLocaleString('de-DE')}</h3>
+                }
+                {
+                    !hoverData &&
+                    <h3>Zuletzt online: {
+                        data ? moment(data.updatedAt).locale("de").fromNow() : null
+                    }</h3>
+                }
+
 
                 {/* Sensor Charts */}
                 <div className='sensors' style={{ padding: '1rem', display: 'flex', overflow: 'scroll' }}>
                     {data &&
                         data.sensors.map((e, i) => (
-                            <Sensor key={i} boxID={data._id} sensor={e}></Sensor>
+                            <Sensor key={i} boxID={data._id} sensor={e} propHover={(e) => setHoverData(e)}></Sensor>
                         ))}
                 </div>
 
