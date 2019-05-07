@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import moment from "moment";
 
-import { FlexibleXYPlot, GradientDefs, linearGradient, AreaSeries } from 'react-vis'
 import Sensor from './Sensor';
 
 
@@ -47,35 +46,25 @@ const BoxPanel = ({ box }) => {
                 overflowX: 'scroll',
                 overflowY: 'hidden',
             }}>
+                {/* Closing span */}
                 <span style={{
                     position: 'absolute',
                     right: 0,
                     top: 0,
-                    margin: '1rem',
+                    padding: '1rem',
                     cursor: 'pointer',
                     zIndex: 5
                 }}
                     onClick={() => setPanelVisible(!panelVisible)} >﹀</span>
 
-                {/* {
-                    box.properties.image && <img style={{
-                        height: '6rem',
-                        borderRadius: '1rem 0rem 0rem 1rem'
-                    }}
-                        src={`https://opensensemap.org/userimages/${box.properties.image}`}></img>
-                } */}
+                {/* Box title and last seen */}
+                <h1 style={{ fontWeight: 'bold' }}>{box.properties.name}</h1>
+                <h3>Zuletzt online: {
+                    data ? moment(data.updatedAt).locale("de").fromNow() : null
+                }</h3>
 
-                <div style={{ padding: '1rem', display: 'flex', overflow: 'scroll' }}>
-                    <div>
-                        <h1 style={{ width: '10rem', fontWeight: 'bold' }}>{box.properties.name}</h1>
-                        {
-                            data &&
-                            <p>{moment(data.updatedAt)
-                                .locale("de")
-                                .fromNow()}
-                            </p>
-                        }
-                    </div>
+                {/* Sensor Charts */}
+                <div className='sensors' style={{ padding: '1rem', display: 'flex', overflow: 'scroll' }}>
                     {data &&
                         data.sensors.map((e, i) => (
                             <Sensor key={i} boxID={data._id} sensor={e}></Sensor>

@@ -3,6 +3,6 @@ body {
   padding: 0;
 }
 
-.heading {
-  margin: 0;
+.sensors div:last-child {
+  border-right: none !important;
 }
