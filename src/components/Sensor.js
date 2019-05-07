@@ -18,7 +18,7 @@ const Sensor = ({ boxID, sensor }) => {
     }, [boxID, sensor])
 
     const CustomTooltip = ({ active, payload, label }) => {
-        if (active) {
+        if (active && payload) {
             return (
                 <div style={{
                     backgroundColor: 'rgba(29, 29, 29, 0.9)',
