@@ -23,9 +23,9 @@ const Sensor = ({ boxID, sensor, propHover }) => {
 
     const _currentValue = () => {
         if (hoverData && hoverData.activePayload) {
-            return hoverData.activePayload[0].payload.y
+            return parseFloat(hoverData.activePayload[0].payload.y).toFixed(2)
         } else {
-            return sensor.lastMeasurement ? sensor.lastMeasurement.value : "N/A"
+            return sensor.lastMeasurement ? parseFloat(sensor.lastMeasurement.value).toFixed(2) : "N/A"
         }
     }
 
@@ -47,9 +47,9 @@ const Sensor = ({ boxID, sensor, propHover }) => {
                 left: 0,
                 textAlign: 'center'
             }}>
-                <h3 style={{ position: 'absolute', bottom: 0, left: '0.5rem', fontSize: 'x-large', fontWeight: 900 }}>{sensor.title}</h3>
+                <h3 style={{ position: 'absolute', bottom: 0, left: '0.5rem', fontSize: 'large', fontWeight: 900 }}>{sensor.title}</h3>
                 {
-                    <div style={{ fontWeight: 500 }}>
+                    <div style={{ fontWeight: 100, position: 'absolute', right: '1rem', fontSize: 'x-large' }}>
                         <p>{_currentValue()} {sensor.unit}</p>
                     </div>
                 }
