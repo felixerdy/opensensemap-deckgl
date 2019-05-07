@@ -221,7 +221,7 @@ const Map = (props) => {
                 {_renderTooltip.bind(this)}
                 <StaticMap mapStyle={'mapbox://styles/mapbox/' + basemap}>
                     <div style={{ position: 'absolute', right: 0, margin: '1rem', zIndex: 999 }}>
-                        <NavigationControl onViewportChange={({ viewState }) => setViewport(prevState => ({ ...prevState, ...viewState }))} />
+                        <NavigationControl onViewportChange={(viewState) => setViewport(prevState => ({ ...prevState, ...viewState }))} />
                         <div style={{ marginTop: '1rem' }} className="mapboxgl-ctrl mapboxgl-ctrl-group">
                             <button className="mapboxgl-ctrl-icon" type="button" onClick={() => setTiltWithDevice(!tiltWithDevice)}>
                                 <i style={{ color: 'blue' }} className={tiltWithDevice ? 'material-icons' : "material-icons-two-tone"}>
