@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DeckGL from '@deck.gl/react';
 import { GeoJsonLayer } from '@deck.gl/layers';
-import { StaticMap } from 'react-map-gl';
+import { StaticMap, NavigationControl } from 'react-map-gl';
 import { HexagonLayer } from '@deck.gl/aggregation-layers';
 import { FlyToInterpolator } from 'deck.gl'
 
@@ -10,6 +10,22 @@ const Map = (props) => {
         return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
     const [data, setData] = useState()
+
+    const [tiltWithDevice, setTiltWithDevice] = useState(false)
+
+    const [layerPanelOpen, setLayerPanelOpen] = useState(false)
+
+    const [layersVisible, setLayersVisible] = useState({
+        scatter: true,
+        heat: true
+    })
+
+    const [basemap, setBasemap] = useState('dark-v10')
+
+    const handleOptionChange = (changeEvent) => {
+        setBasemap(changeEvent.target.value)
+    }
+
 
     // Viewport settings
     const [viewport, setViewport] = useState({
@@ -31,9 +47,9 @@ const Map = (props) => {
         stroked: false,
         pointRadiusMinPixels: 6,
         getRadius: 10,
-        visible: !props.layersVisible.heat ? true : (props.layersVisible.scatter && (viewport.zoom < 5 ? false : true)),
+        visible: !layersVisible.heat ? true : (layersVisible.scatter && (viewport.zoom < 5 ? false : true)),
         opacity: () => {
-            if (props.layersVisible.heat) {
+            if (layersVisible.heat) {
                 if (viewport.zoom < 5) {
                     return 0
                 }
@@ -55,7 +71,7 @@ const Map = (props) => {
             return diff < 604800000 ? [78, 175, 71, scaled] : [78, 175, 71, 50]
         },
         onHover: ({ object, x, y }) => {
-            if (viewport.zoom > 6 || !props.layersVisible.heat) {
+            if (viewport.zoom > 6 || !layersVisible.heat) {
                 setTooltip({
                     object: object,
                     pointerX: x,
@@ -64,7 +80,7 @@ const Map = (props) => {
             }
         },
         onClick: ({ object }) => {
-            if (viewport.zoom > 6 || !props.layersVisible.heat) {
+            if (viewport.zoom > 6 || !layersVisible.heat) {
                 props.onBoxSelect(object)
                 console.log(object)
             }
@@ -74,19 +90,17 @@ const Map = (props) => {
     const heat = new HexagonLayer({
         id: 'heatmap',
         colorRange: [
-            [1, 152, 189],
-            [73, 227, 206],
-            [216, 254, 181],
-            [254, 237, 177],
-            [254, 173, 84],
-            [209, 55, 78]
+            [161, 217, 155],
+            [116, 196, 118],
+            [49, 163, 84],
+            [0, 109, 44],
         ],
         data: data ? data.features : [],
         elevationScale: 200,
         extruded: true,
         radius: 20000,
         coverage: 0.8,
-        visible: props.layersVisible.heat && (viewport.zoom > 6 ? false : true),
+        visible: layersVisible.heat && (viewport.zoom > 6 ? false : true),
         pickable: true,
         onHover: ({ object, x, y }) => {
             if (viewport.zoom < 6) {
@@ -135,11 +149,11 @@ const Map = (props) => {
     useEffect(() => {
         setScatterLayer(scatter)
         setHeatLayer(heat)
-    }, [props.layersVisible, viewport.zoom, data])
+    }, [layersVisible, viewport.zoom, data])
 
     //  device orientation
     useEffect(() => {
-        if (props.tiltWithDevice) {
+        if (tiltWithDevice) {
             window.addEventListener("deviceorientation", _handleOrientation, true);
         }
 
@@ -155,7 +169,7 @@ const Map = (props) => {
                 }))
             }, 200)
         };
-    }, [props.tiltWithDevice])
+    }, [tiltWithDevice])
 
     const _handleOrientation = (e) => {
         if (e.beta <= 60 && e.beta >= 0) {
@@ -174,7 +188,7 @@ const Map = (props) => {
                 transitionInterpolator: new FlyToInterpolator()
             }))
         }
-        
+
     }
 
     const _renderTooltip = () => {
@@ -205,7 +219,62 @@ const Map = (props) => {
                 onViewStateChange={({ viewState }) => setViewport(prevState => ({ ...prevState, ...viewState }))}
                 layers={[heatLayer, scatterLayer]}>
                 {_renderTooltip.bind(this)}
-                <StaticMap mapStyle={'mapbox://styles/mapbox/' + props.basemap} />
+                <StaticMap mapStyle={'mapbox://styles/mapbox/' + basemap}>
+                    <div style={{ position: 'absolute', right: 0, margin: '1rem', zIndex: 999 }}>
+                        <NavigationControl onViewportChange={({ viewState }) => setViewport(prevState => ({ ...prevState, ...viewState }))} />
+                        <div style={{ marginTop: '1rem' }} className="mapboxgl-ctrl mapboxgl-ctrl-group">
+                            <button className="mapboxgl-ctrl-icon" type="button" onClick={() => setTiltWithDevice(!tiltWithDevice)}>
+                                <i style={{ color: 'blue' }} className={tiltWithDevice ? 'material-icons' : "material-icons-two-tone"}>
+                                    screen_rotation
+                                </i>
+                            </button>
+                        </div>
+                        <div style={{ marginTop: '1rem' }} className="mapboxgl-ctrl mapboxgl-ctrl-group">
+                            <button className="mapboxgl-ctrl-icon" type="button" onClick={() => setLayerPanelOpen(!layerPanelOpen)}>
+                                <i className='material-icons'>
+                                    layers
+                                </i>
+                            </button>
+                        </div>
+                        <div style={{
+                            width: layerPanelOpen ? 'auto' : 0,
+                            height: layerPanelOpen ? 'auto' : 0,
+                            transition: '200ms',
+                            position: 'absolute',
+                            right: '0',
+                            overflow: 'hidden',
+                            borderRadius: '4px',
+                            padding: layerPanelOpen ? '1rem' : 0,
+                            background: '#fff',
+                            marginTop: '1rem'
+                        }}>
+                            <h3 className="heading">Basemap</h3>
+                            <select onChange={handleOptionChange} value={basemap}>
+                                <option value='streets-v11' >Streets</option>
+                                <option value='light-v10' >Light</option>
+                                <option value='dark-v10' >Dark</option>
+                                <option value='outdoors-v11' >Outdoors</option>
+                                <option value='satellite-v9' >Satellite</option>
+                            </select>
+                            <hr></hr>
+                            <h3 className="heading">Layers</h3>
+                            <p
+                                style={{
+                                    textDecoration: layersVisible.scatter ? 'none' : 'line-through',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => setLayersVisible({ ...layersVisible, scatter: !layersVisible.scatter })}
+                            >Scatterplot</p>
+                            <p
+                                style={{
+                                    textDecoration: layersVisible.heat ? 'none' : 'line-through',
+                                    cursor: 'pointer'
+                                }}
+                                onClick={() => setLayersVisible({ ...layersVisible, heat: !layersVisible.heat })}
+                            >Heatmap</p>
+                        </div>
+                    </div>
+                </StaticMap>
             </DeckGL>
         </React.Fragment>
     )
