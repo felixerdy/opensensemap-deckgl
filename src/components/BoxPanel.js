@@ -62,7 +62,7 @@ const BoxPanel = ({ box }) => {
                 {/* Box title and last seen */}
                 <h1 style={{ fontWeight: 'bold' }}>{box.properties.name}</h1>
                 {
-                    hoverData &&
+                    (hoverData && hoverData.activePayload) &&
                     <h3>{hoverData.activePayload[0].payload.x.toLocaleString('de-DE')}</h3>
                 }
                 {
