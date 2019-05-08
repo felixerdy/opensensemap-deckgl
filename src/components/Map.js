@@ -217,9 +217,10 @@ const Map = (props) => {
                 viewState={viewport}
                 controller
                 onViewStateChange={({ viewState }) => setViewport(prevState => ({ ...prevState, ...viewState }))}
-                layers={[heatLayer, scatterLayer]}>
-                {_renderTooltip.bind(this)}
-                <StaticMap mapStyle={'mapbox://styles/mapbox/' + basemap}>
+                layers={[heatLayer, scatterLayer]}
+                pickingRadius={5}>
+                {_renderTooltip}
+                <StaticMap mapStyle={'mapbox://styles/mapbox/' + basemap} reuseMaps preventStyleDiffing={true}>
                     <div style={{ position: 'absolute', right: 0, margin: '1rem', zIndex: 999 }}>
                         <NavigationControl onViewportChange={(viewState) => setViewport(prevState => ({ ...prevState, ...viewState }))} />
                         <div style={{ marginTop: '1rem' }} className="mapboxgl-ctrl mapboxgl-ctrl-group">
